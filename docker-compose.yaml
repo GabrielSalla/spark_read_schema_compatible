@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  motoserver:
+    image: ghcr.io/getmoto/motoserver:latest
+    ports:
+      - 5000:5000
+    healthcheck:
+      test: curl --fail localhost:5000 || exit 1
+      interval: 5s
+      timeout: 1s
+      retries: 3
+      start_period: 5s
+
+  spark-server:
+    build:
+      context: .
+      dockerfile: Dockerfile-spark
+    environment:
+      SPARK_NO_DAEMONIZE: 1
+    ports:
+      - 15002:15002
+      - 4040:4040
+    healthcheck:
+      test: curl --fail localhost:4040 || exit 1
+      interval: 2s
+      timeout: 1s
+      retries: 3
+      start_period: 15s
+
+  app-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+    depends_on:
+      spark-server:
+        condition: service_healthy
+      motoserver:
+        condition: service_healthy
+    volumes:
+      - ./src/:/app/src/:Z
+      - ./tests/:/app/tests/:Z
+    command: pytest

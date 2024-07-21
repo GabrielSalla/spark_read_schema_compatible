@@ -1,0 +1,26 @@
+FROM maven:3.8.6-jdk-11-slim
+
+ENV SPARK_VERSION=3.5.1
+ENV SPARK_PACKAGE_FILE=spark-$SPARK_VERSION-bin-hadoop3
+
+RUN apt-get update && \
+    apt-get install -y gettext-base wget
+
+RUN echo "Downloading $SPARK_PACKAGE_FILE" && \
+    wget -q https://dlcdn.apache.org/spark/spark-$SPARK_VERSION/$SPARK_PACKAGE_FILE.tgz && \
+    tar -xvf $SPARK_PACKAGE_FILE.tgz && \
+    rm $SPARK_PACKAGE_FILE.tgz && \
+    mkdir /corrupted_data && \
+    echo "a,b,c" > /corrupted_data/data.avro && \
+    echo "a,b,c" > /corrupted_data/data.json && \
+    echo "a,b,c" > /corrupted_data/data.parquet
+
+COPY spark/spark-packages.txt spark/spark-conf.txt ./
+
+# Run the server the first time to cache the Spark packages
+RUN $SPARK_PACKAGE_FILE/sbin/start-connect-server.sh --packages $(head -c -1 spark-packages.txt | envsubst | tr '\n' ',') && \
+    printf "Waiting for Spark packages to download" && \
+    until curl --output /dev/null --silent --head --fail localhost:4040; do printf "."; sleep 1; done && \
+    printf "\n"
+
+ENTRYPOINT $SPARK_PACKAGE_FILE/sbin/start-connect-server.sh --packages $(head -c -1 spark-packages.txt | envsubst | tr '\n' ',') $(head -c -1 spark-conf.txt | sed -e "s/.*/--conf &/" | tr '\n' ' ')

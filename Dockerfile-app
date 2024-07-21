@@ -1,0 +1,16 @@
+FROM maven:3.8.6-jdk-11-slim as base
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH=$VIRTUAL_ENV/bin:$PATH
+
+RUN apt-get update -y && \
+    apt-get install -y gcc python3 python3-pip python3-venv vim && \
+    apt-get clean && \
+    python3 -m venv $VIRTUAL_ENV && \
+    python3 -m pip install --upgrade pip setuptools wheel
+
+COPY pytest.ini requirements.txt requirements_tests.txt constraints.txt /app/
+
+WORKDIR /app
+
+RUN  pip3 install --no-cache-dir -r requirements.txt -r requirements_tests.txt -c constraints.txt

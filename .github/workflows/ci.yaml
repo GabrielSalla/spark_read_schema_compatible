@@ -1,0 +1,37 @@
+name: Tests and linter
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  run-linter:
+    name: Run Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install flake8
+        run: pip3 install flake8
+      - name: Run linter
+        run: flake8 src tests
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Docker
+        run: sudo apt install docker docker-compose
+      - name: Run Tests
+        run: |
+          make build-ci &&
+          make run-tests

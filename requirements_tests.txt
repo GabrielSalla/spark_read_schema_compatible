@@ -1,0 +1,4 @@
+boto3==1.34.145
+pytest==7.1.2
+pytest-mock==3.6.1
+flake8==3.8.4
