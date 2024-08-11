@@ -65,13 +65,13 @@ Here's the algorithm to read data when there're schema conflicts between the fil
 
 So, the strategy is to read from top level to bottom level. If reading a whole pattern fails because there's a type change in it, read by partition. If reading a partition fails, read file by file. The file will never have a schema change in the middle of it. After reading all the data, cast it to the desired schema, union it all and return.
 
-The fallback adds an overhead to the process. It's a lot slower to read file by file when comparing to reading a whole partition that have 100 files. For this reason, reading at the lower levels should only be done if really necessary, when there's a schema merge error.
+The fallback adds an overhead to the process. It's a lot slower to read file by file when compared to reading a whole partition that have 100 files. For this reason, reading at the lower levels should only be done if really necessary, when there's a schema merge error.
 
 If there're 10 patterns to read but only 1 of them has a schema change in it, 9 will be loaded directly and only the problematic one will be loaded by partitions. And if only a single partition has a schema change in it, only this one will be loaded file by file, all the other ones will be loaded partition by partition.
 
 It's expected that loading data this way will be slower, but at least it's doable without human intervention.
 
-A better method would be if it was known beforehand where the schema change happens, but as this information is not available through code, the "try to read and fallback if there's an error" method is the most efficient I found.
+A better method would be if it was known beforehand where the schema change happens, but as this information is not available through code, the "try to read and fallback if there's an error" method is the most efficient way I found.
 
 # Dealing with Avro format
 Avro format is really difficult to handle and there are some strategies to read these kind of files efficiently.
@@ -90,12 +90,12 @@ If a schema is provided when reading the files, it'll be used when reading all t
 1. If the schema of File 2 is provided when reading the data, no data will be lost
 
 But this approach comes with a consequence: it'll raise an exception every time the data being read has a column type different from the provided schema.
-1. Reading 10 partitions, where the first 9 has a column with `int` type, but the latest one has the same column with `long` type
+1. Reading 10 partitions, where the first 9 have a column with `int` type, but the last one has the same column with `long` type
 1. If reading the partitions with the schema of the last partition, the first 9 will raise an error indicating an incompatible schema
 1. The last partition will be read correctly
 
 If this scenario happens, the previous algorithm will result in reading the first 9 partitions file by file, even though they could be read as a whole without any incompatibility. To bypass this behavior, the schema used to read Avro files is obtained for each pattern and/or partition, avoiding the fallback if not necessary.
-1. Following the same example as before, reading 10 partitions, where the first 9 has a column with `int` type, but the latest one has the same column with `long` type
+1. Following the same example as before, reading 10 partitions, where the first 9 have a column with `int` type, but the last one has the same column with `long` type
 1. Read each partition with the schema of the **last file of each partition**
 1. The first 9 will be read with the column as `int` type
 1. The last one will be read with the column as `long` type
