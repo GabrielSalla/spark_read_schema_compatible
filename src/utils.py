@@ -1,14 +1,13 @@
-from pyspark.sql.functions import col
 from pyspark.sql import DataFrame
+from pyspark.sql.connect.column import Column
+from pyspark.sql.functions import col
 from pyspark.sql.types import StructType
 
 
-def column(column):
-    """If "column" is defined, escape it surrounding the column with "`", otherwise
-    return the same value
-    As "column" might be a list or a tuple, escape each element instead of the whole object
-    """
-    return col(f"`{column}`")
+def column(column_name: str) -> Column:
+    """Get a Spark's Column object with the column name escaped, making it compatible with column
+    names that have special characters, like dots"""
+    return col(f"`{column_name}`")
 
 
 def convert_dataframe_to_schema(dataframe: DataFrame, schema: StructType) -> DataFrame:

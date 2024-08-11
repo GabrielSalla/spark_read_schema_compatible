@@ -1,13 +1,15 @@
-def _build_path(base_path: str, partition_name: str = None, partition_value: str = None) -> str:
+def _build_path(base_path: str, partition_name: str = None, pattern: str = None) -> str:
+    """Build the path to be read based on a base path, a partition name and a pattern"""
+    # Assert the base path ends with an "/"
     if not base_path.endswith("/"):
         base_path += "/"
     path = base_path
     if partition_name:
-        if not partition_value:
-            raise ValueError("Expected 'partition_name' to be used with 'partition_value'")
+        if not pattern:
+            raise ValueError("Expected 'partition_name' to be used with 'pattern'")
         path += partition_name + "="
-    if partition_value:
-        path += "{" + partition_value + "}"
+    if pattern:
+        path += "{" + pattern + "}"
     return path
 
 
