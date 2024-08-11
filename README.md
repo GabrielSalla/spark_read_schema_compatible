@@ -1,4 +1,4 @@
-# Spark read schema compatible
+# Reading data with different schemas using Spark
 If you got to this repository, you were, probably, searching for something like **"how to read parquet files with different schemas using spark"**. I'm betting on this because I, myself, searched for it multiple times before.
 
 Here's the problem: there're some parquet files somewhere and I want to read them. If, for some reason there're files with mismatched schemas, Spark doesn't know how to read them. An example is a file where a column is of type `int` and another file where this same column is of type `long`.
