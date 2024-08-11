@@ -9,9 +9,9 @@ from pyspark.sql.functions import col, replace, lit
 from pyspark.sql.readwriter import DataFrameReader
 from pyspark.sql.types import StructType
 
-from src.path_functions import get_path, get_path_patterns
-from src.avro_schema_utils import convert_schema_to_avro
-from src.utils import (
+from .path_functions import get_path, get_path_patterns
+from .avro_schema_utils import convert_schema_to_avro
+from .utils import (
     convert_dataframe_to_schema,
     union_dfs,
 )
